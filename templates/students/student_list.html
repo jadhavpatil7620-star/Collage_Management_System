@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Students{% endblock %}
+{% block page_title %}Students{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <h5><i class="bi bi-people-fill text-primary me-2"></i>Student Directory</h5>
+  {% if request.user.role == 'principal' or request.user.role == 'clerk' %}
+  <a href="{% url 'student_add' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-person-plus-fill me-1"></i>Add Student
+  </a>
+  {% endif %}
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body p-3">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label">Search</label>
+        <input type="text" name="q" class="form-control" placeholder="Name, PRN, Admission No..." value="{{ search|default:'' }}"/>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Filter by Class</label>
+        <select name="class" class="form-select">
+          <option value="">All Classes</option>
+          {% for cls in classes %}
+          <option value="{{ cls.pk }}" {% if class_filter == cls.pk|stringformat:"s" %}selected{% endif %}>{{ cls }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-search me-1"></i>Search</button>
+        <a href="{% url 'student_list' %}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <span>Showing <strong>{{ students.count }}</strong> students</span>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student</th>
+            <th>PRN</th>
+            <th>Class</th>
+            <th>Phone</th>
+            <th>Gender</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td class="text-muted-sm">{{ forloop.counter }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                {% if student.photo %}
+                  <img src="{{ student.photo.url }}" class="avatar-sm" alt="">
+                {% else %}
+                  <span class="avatar-initials" style="font-size:11px;">{{ student.first_name|first }}{{ student.last_name|first }}</span>
+                {% endif %}
+                <div>
+                  <div class="fw-600" style="font-size:13px;">{{ student.full_name }}</div>
+                  <div class="text-muted-sm">Adm: {{ student.admission_no }}</div>
+                </div>
+              </div>
+            </td>
+            <td><code style="font-size:12px;">{{ student.prn }}</code></td>
+            <td><span class="text-muted-sm">{{ student.current_class|default:"—" }}</span></td>
+            <td><span class="text-muted-sm">{{ student.phone }}</span></td>
+            <td>
+              <span class="badge bg-{% if student.gender == 'M' %}primary{% elif student.gender == 'F' %}danger{% else %}secondary{% endif %} bg-opacity-10 text-{% if student.gender == 'M' %}primary{% elif student.gender == 'F' %}danger{% else %}secondary{% endif %}" style="font-size:10px;">
+                {{ student.get_gender_display }}
+              </span>
+            </td>
+            <td>
+              <span class="badge bg-{% if student.status == 'active' %}success{% else %}secondary{% endif %} bg-opacity-10 text-{% if student.status == 'active' %}success{% else %}secondary{% endif %}" style="font-size:10px;">
+                {{ student.get_status_display }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{% url 'student_detail' student.pk %}" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                {% if request.user.role == 'principal' or request.user.role == 'clerk' %}
+                <a href="{% url 'student_edit' student.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                <a href="{% url 'issue_bonafide' %}?student={{ student.pk }}" class="btn btn-sm btn-outline-success" title="Bonafide"><i class="bi bi-file-earmark-text"></i></a>
+                {% endif %}
+                {% if request.user.role == 'accountant' or request.user.role == 'principal' %}
+                <a href="{% url 'collect_fee' %}?student={{ student.pk }}" class="btn btn-sm btn-outline-warning" title="Fee"><i class="bi bi-cash"></i></a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <i class="bi bi-people"></i>
+                <p>No students found</p>
+                {% if request.user.role == 'principal' or request.user.role == 'clerk' %}
+                <a href="{% url 'student_add' %}" class="btn btn-primary btn-sm">Add First Student</a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

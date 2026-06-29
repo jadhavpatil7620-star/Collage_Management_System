@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Notices{% endblock %}
+{% block page_title %}Notice Board{% endblock %}
+{% block content %}
+<div class="empty-state">
+  <i class="bi bi-megaphone-fill"></i>
+  <p>Notice board coming soon</p>
+  <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm">Back to Dashboard</a>
+</div>
+{% endblock %}

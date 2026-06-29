@@ -1,0 +1,340 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}College Management System{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+  <style>
+    :root {
+      --sidebar-bg: #0f172a;
+      --sidebar-width: 260px;
+      --sidebar-text: #94a3b8;
+      --sidebar-hover: #1e293b;
+      --sidebar-active: #3b82f6;
+      --topbar-h: 64px;
+      --accent: #3b82f6;
+      --accent2: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+    }
+    #cropImage{
+    max-height:65vh;
+    width:auto;
+    display:block;
+    margin:auto;
+  }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); overflow-x: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0; height: 100vh; width: var(--sidebar-width);
+      background: var(--sidebar-bg); z-index: 1000; display: flex; flex-direction: column;
+      transition: transform .3s ease; overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 20px 20px 16px; border-bottom: 1px solid #1e293b;
+    }
+    .sidebar-brand .college-name {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700;
+      color: #f1f5f9; line-height: 1.3;
+    }
+    .sidebar-brand .college-subtitle { font-size: 11px; color: #475569; margin-top: 2px; }
+    .sidebar-brand .logo-icon {
+      width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 10px;
+    }
+    .sidebar-user {
+      padding: 14px 20px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-user .avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .sidebar-user .user-info .name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+    .sidebar-user .user-info .role {
+      font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: .5px;
+    }
+    .sidebar-nav { padding: 12px 0; flex: 1; }
+    .nav-section-label {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: #334155; padding: 10px 20px 4px;
+    }
+    .nav-item a {
+      display: flex; align-items: center; gap: 10px; padding: 9px 20px;
+      color: var(--sidebar-text); text-decoration: none; font-size: 13px; font-weight: 500;
+      border-left: 3px solid transparent; transition: all .2s;
+    }
+    .nav-item a:hover { background: var(--sidebar-hover); color: #e2e8f0; }
+    .nav-item a.active { background: rgba(59,130,246,.12); color: var(--accent); border-left-color: var(--accent); }
+    .nav-item a i { font-size: 15px; width: 18px; flex-shrink: 0; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid #1e293b; }
+    .sidebar-footer a { font-size: 12px; color: #475569; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .sidebar-footer a:hover { color: var(--danger); }
+
+    /* ── Main ── */
+    .main-wrap { margin-left: var(--sidebar-width); min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar {
+      position: sticky; top: 0; height: var(--topbar-h); background: var(--card-bg);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center;
+      padding: 0 28px; gap: 16px; z-index: 100;
+    }
+    .topbar .page-title { font-family: 'Plus Jakarta Sans',sans-serif; font-size: 18px; font-weight: 700; flex: 1; }
+    .topbar .btn-icon {
+      width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background .2s; color: var(--text-secondary);
+    }
+    .topbar .btn-icon:hover { background: var(--bg); }
+    .main-content { flex: 1; padding: 28px; }
+
+    /* ── Cards ── */
+    .card { border: 1px solid var(--border); border-radius: 14px; background: var(--card-bg); box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+    .card-header { background: transparent; border-bottom: 1px solid var(--border); padding: 16px 20px; font-weight: 600; font-size: 14px; }
+    .stat-card { border-radius: 14px; padding: 22px; color: #fff; position: relative; overflow: hidden; }
+    .stat-card::after { content:''; position:absolute; right:-20px; top:-20px; width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,.1); }
+    .stat-card .stat-icon { font-size: 28px; margin-bottom: 12px; }
+    .stat-card .stat-value { font-size: 32px; font-weight: 800; font-family:'Plus Jakarta Sans',sans-serif; }
+    .stat-card .stat-label { font-size: 12px; opacity: .85; margin-top: 4px; }
+    .stat-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .stat-green { background: linear-gradient(135deg, #10b981, #047857); }
+    .stat-purple { background: linear-gradient(135deg, #8b5cf6, #5b21b6); }
+    .stat-orange { background: linear-gradient(135deg, #f59e0b, #b45309); }
+    .stat-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+    .stat-teal { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+
+    /* ── Table ── */
+    .table { font-size: 13px; }
+    .table thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); border-bottom: 2px solid var(--border); font-weight: 600; padding: 10px 12px; }
+    .table tbody td { padding: 12px; vertical-align: middle; }
+    .table-hover tbody tr:hover { background: #f8fafc; }
+
+    /* ── Badges ── */
+    .badge-role { display: inline-block; font-size: 10px; padding: 3px 10px; border-radius: 100px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+    .badge-principal { background: #fef3c7; color: #92400e; }
+    .badge-staff { background: #dbeafe; color: #1e40af; }
+    .badge-clerk { background: #dcfce7; color: #14532d; }
+    .badge-accountant { background: #f3e8ff; color: #581c87; }
+
+    /* ── Forms ── */
+    .form-control, .form-select { font-size: 13px; border-radius: 8px; border: 1px solid var(--border); }
+    .form-control:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+
+    /* ── Buttons ── */
+    .btn { border-radius: 8px; font-size: 13px; font-weight: 600; padding: 8px 16px; }
+    .btn-primary { background: var(--accent); border-color: var(--accent); }
+    .btn-primary:hover { background: #2563eb; border-color: #2563eb; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── Messages ── */
+    .alert { border-radius: 10px; font-size: 13px; border: none; }
+    .alert-success { background: #dcfce7; color: #14532d; }
+    .alert-danger { background: #fee2e2; color: #7f1d1d; }
+    .alert-info { background: #dbeafe; color: #1e3a8a; }
+    .alert-warning { background: #fef3c7; color: #713f12; }
+
+    /* ── Sidebar toggle for mobile ── */
+    .sidebar-toggle { display: none; }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-wrap { margin-left: 0; }
+      .sidebar-toggle { display: flex; }
+    }
+
+    /* ── Utilities ── */
+    .text-muted-sm { font-size: 12px; color: var(--text-secondary); }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .section-header h5 { font-family: 'Plus Jakarta Sans',sans-serif; font-weight: 700; font-size: 16px; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+    .empty-state i { font-size: 48px; margin-bottom: 12px; opacity: .3; display: block; }
+    .avatar-sm { width:32px; height:32px; border-radius:50%; object-fit:cover; }
+    .avatar-initials {
+      width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff;
+    }
+    .avatar{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    object-fit:cover;
+}
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo-icon">🎓</div>
+    <div class="college-name">College Management<br>System</div>
+    <div class="college-subtitle">Academic Portal v1.0</div>
+  </div>
+
+  <div class="sidebar-user">
+    {% if request.user.profile_photo %}
+    <img src="{{ request.user.profile_photo.url }}"
+         class="avatar"
+         style="object-fit:cover;">
+{% else %}
+    <div class="avatar">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+    </div>
+{% endif %}
+    <div class="user-info">
+      <div class="name">{{ request.user.get_full_name|default:request.user.username }}</div>
+      <div class="role">{{ request.user.get_role_display }}</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <div class="nav-item">
+      <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+    </div>
+
+    <div class="nav-section-label">Students</div>
+    <div class="nav-item">
+      <a href="{% url 'student_list' %}" class="{% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-people-fill"></i> All Students
+      </a>
+    </div>
+    {% if request.user.role in 'principal,clerk' %}
+    <div class="nav-item">
+      <a href="{% url 'student_add' %}"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+    </div>
+    {% endif %}
+    <div class="nav-item">
+      <a href="{% url 'class_list' %}"><i class="bi bi-grid-fill"></i> Classes</a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'department_list' %}"><i class="bi bi-building"></i> Departments</a>
+    </div>
+
+    <div class="nav-section-label">Academics</div>
+    <div class="nav-item">
+      <a href="{% url 'attendance_dashboard' %}" class="{% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-calendar-check-fill"></i> Attendance
+      </a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'attendance_report' %}"><i class="bi bi-bar-chart-fill"></i> Attendance Report</a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'results_dashboard' %}" class="{% if 'result' in request.resolver_match.url_name or 'exam' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-award-fill"></i> Results
+      </a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'practical_marks' %}"><i class="bi bi-flask-fill"></i> Practical Marks</a>
+    </div>
+
+    {% if request.user.role == 'accountant' or request.user.role == 'principal' %}
+    <div class="nav-section-label">Finance</div>
+    <div class="nav-item">
+      <a href="{% url 'finance_dashboard' %}" class="{% if 'finance' in request.resolver_match.url_name or 'fee' in request.resolver_match.url_name or 'expense' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-cash-stack"></i> Finance Dashboard
+      </a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'collect_fee' %}"><i class="bi bi-receipt"></i> Collect Fee</a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'fee_report' %}"><i class="bi bi-file-earmark-bar-graph"></i> Fee Report</a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'expense_list' %}"><i class="bi bi-wallet2"></i> Expenses</a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'scholarship_list' %}"><i class="bi bi-trophy-fill"></i> Scholarships</a>
+    </div>
+    {% endif %}
+
+    {% if request.user.role == 'principal' or request.user.role == 'clerk' %}
+    <div class="nav-section-label">Certificates</div>
+    <div class="nav-item">
+      <a href="{% url 'bonafide_list' %}" class="{% if 'bonafide' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-file-earmark-text-fill"></i> Bonafide Certs
+      </a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'issue_bonafide' %}"><i class="bi bi-file-earmark-plus-fill"></i> Issue Bonafide</a>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'leaving_cert_list' %}"><i class="bi bi-file-earmark-x-fill"></i> Leaving Certs</a>
+    </div>
+    {% endif %}
+
+    {% if request.user.role == 'principal' %}
+    <div class="nav-section-label">Administration</div>
+    <div class="nav-item">
+      <a href="{% url 'manage_users' %}"><i class="bi bi-person-gear"></i> Manage Staff</a>
+    </div>
+    <div class="nav-item">
+      <a href="/admin/"><i class="bi bi-shield-lock-fill"></i> Admin Panel</a>
+    </div>
+    {% endif %}
+
+    <div class="nav-section-label">Account</div>
+    <div class="nav-item">
+      <a href="{% url 'profile' %}"><i class="bi bi-person-circle"></i> My Profile</a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="/accounts/logout/"><i class="bi bi-box-arrow-left"></i> Logout</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main-wrap">
+  <div class="topbar">
+    <button class="btn-icon sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">
+      <i class="bi bi-list"></i>
+    </button>
+    <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-muted-sm d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span>
+      <span class="badge-role badge-{{ request.user.role }}">{{ request.user.get_role_display }}</span>
+    </div>
+  </div>
+
+  <div class="main-content">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+          <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% else %}info-circle{% endif %}-fill me-2"></i>
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

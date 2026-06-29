@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Add Fee Structure{% endblock %}
+{% block page_title %}Add Fee Structure{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-plus-circle-fill text-primary me-2"></i>New Fee Structure</div>
+      <div class="card-body p-4">
+        <form method="post">{% csrf_token %}
+          <div class="mb-3"><label class="form-label">Name *</label>{{ form.name }}</div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6"><label class="form-label">Academic Year *</label>{{ form.academic_year }}</div>
+            <div class="col-md-6"><label class="form-label">Amount (₹) *</label>{{ form.amount }}</div>
+          </div>
+          <div class="mb-3"><label class="form-label">Class (optional)</label>{{ form.class_group }}</div>
+          <div class="mb-3"><label class="form-label">Due Date</label>{{ form.due_date }}</div>
+          <div class="mb-3"><label class="form-label">Description</label>{{ form.description }}</div>
+          <div class="mb-4"><label class="form-label">Active</label><div>{{ form.is_active }}</div></div>
+          {% if form.errors %}<div class="alert alert-danger">{{ form.errors }}</div>{% endif %}
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'fee_structure_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

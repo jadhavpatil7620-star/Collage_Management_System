@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Issue Bonafide Certificate{% endblock %}
+{% block page_title %}Issue Bonafide Certificate{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-file-earmark-plus-fill text-success me-2"></i>Issue Bonafide Certificate</div>
+      <div class="card-body p-4">
+        <form method="post">{% csrf_token %}
+          <div class="mb-3"><label class="form-label">Student *</label>{{ form.student }}</div>
+          <div class="mb-3"><label class="form-label">Purpose *</label>{{ form.purpose }}</div>
+          <div class="mb-3"><label class="form-label">Custom Purpose (if Other)</label>{{ form.custom_purpose }}</div>
+          <div class="mb-4"><label class="form-label">Additional Text</label>{{ form.additional_text }}</div>
+          {% if form.errors %}<div class="alert alert-danger">{{ form.errors }}</div>{% endif %}
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'bonafide_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-success"><i class="bi bi-file-earmark-check me-1"></i>Issue & Print</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

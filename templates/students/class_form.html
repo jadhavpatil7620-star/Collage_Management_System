@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-grid-fill text-primary me-2"></i>{{ title }}</div>
+      <div class="card-body p-4">
+        <form method="post">{% csrf_token %}
+          <div class="mb-3"><label class="form-label">Class Name (FY/SY/TY) *</label>{{ form.name }}</div>
+          <div class="mb-3"><label class="form-label">Division (A/B/C) *</label>{{ form.division }}</div>
+          <div class="mb-3"><label class="form-label">Department *</label>{{ form.department }}</div>
+          <div class="mb-3"><label class="form-label">Academic Year *</label>{{ form.academic_year }}</div>
+          <div class="mb-4"><label class="form-label">Class Teacher</label>{{ form.class_teacher }}</div>
+          {% if form.errors %}<div class="alert alert-danger">{{ form.errors }}</div>{% endif %}
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'class_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

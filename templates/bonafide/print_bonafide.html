@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Bonafide Certificate #{{ cert.certificate_no }}{% endblock %}
+{% block page_title %}Bonafide Certificate{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+  .sidebar, .topbar, .no-print { display: none !important; }
+  .main-wrap { margin-left: 0 !important; }
+  .cert-paper { box-shadow: none !important; }
+  body { background: white !important; }
+}
+.cert-paper { max-width: 780px; margin: 0 auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
+.cert-border { border: 8px solid #1e3a8a; border-radius: 4px; margin: 20px; padding: 40px; position: relative; }
+.cert-border::before {
+  content: '';
+  position: absolute; inset: 4px;
+  border: 2px solid #93c5fd;
+  border-radius: 2px;
+  pointer-events: none;
+}
+.watermark {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%) rotate(-30deg);
+  font-size: 80px; font-weight: 800;
+  color: rgba(59,130,246,.05);
+  white-space: nowrap; pointer-events: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  z-index: 0;
+}
+.cert-content { position: relative; z-index: 1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="no-print mb-3 d-flex gap-2">
+  <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer-fill me-2"></i>Print Certificate</button>
+  <a href="{% url 'issue_bonafide' %}" class="btn btn-outline-secondary"><i class="bi bi-plus me-1"></i>New Certificate</a>
+  <a href="{% url 'bonafide_list' %}" class="btn btn-outline-secondary"><i class="bi bi-list me-1"></i>All Certificates</a>
+</div>
+
+<div class="cert-paper">
+  <div class="cert-border">
+    <div class="watermark">BONAFIDE</div>
+    <div class="cert-content">
+
+      <!-- College Header -->
+      <div class="text-center mb-4">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:50%;font-size:32px;margin-bottom:12px;">🎓</div>
+        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:#1e3a8a;margin:0;">COLLEGE MANAGEMENT SYSTEM</h2>
+        <p style="font-size:12px;color:#64748b;margin:4px 0;">Accredited Institution · Est. 2000</p>
+        <div style="width:80px;height:3px;background:linear-gradient(90deg,#1e3a8a,#3b82f6);margin:10px auto;border-radius:100px;"></div>
+      </div>
+
+      <!-- Certificate Title -->
+      <div class="text-center mb-4">
+        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:#1e3a8a;letter-spacing:3px;text-transform:uppercase;border:2px solid #1e3a8a;display:inline-block;padding:8px 30px;border-radius:4px;">
+          BONAFIDE CERTIFICATE
+        </h3>
+      </div>
+
+      <!-- Certificate No & Date -->
+      <div class="d-flex justify-content-between mb-4" style="font-size:12px;color:#64748b;">
+        <div><strong>Certificate No.:</strong> <span style="color:#1e3a8a;font-weight:700;">{{ cert.certificate_no }}</span></div>
+        <div><strong>Date:</strong> {{ cert.issued_date|date:"d F Y" }}</div>
+      </div>
+
+      <!-- Body -->
+      <div style="font-size:15px;line-height:2.2;color:#1e293b;text-align:justify;">
+        <p>
+          This is to certify that <strong style="font-size:16px;color:#1e3a8a;border-bottom:2px solid #93c5fd;">{{ cert.student.full_name }}</strong>{% if cert.student.gender == 'M' %}, Son{% elif cert.student.gender == 'F' %}, Daughter{% endif %} of <strong>{{ cert.student.father_name }}</strong>, bearing PRN <strong>{{ cert.student.prn }}</strong> and Admission No. <strong>{{ cert.student.admission_no }}</strong>, is a <em>bonafide student</em> of this institution.
+        </p>
+        <p>
+          The student is currently enrolled in <strong>{{ cert.student.current_class|default:"our college" }}</strong> for the academic year.
+        </p>
+        {% if cert.purpose != 'general' %}
+        <p>
+          This certificate is issued for the purpose of <strong>{{ cert.get_purpose_display }}</strong>{% if cert.custom_purpose %} — {{ cert.custom_purpose }}{% endif %}.
+        </p>
+        {% endif %}
+        {% if cert.additional_text %}
+        <p>{{ cert.additional_text }}</p>
+        {% endif %}
+        <p>We wish the student all the best in their endeavours.</p>
+      </div>
+
+      <!-- Signature Row -->
+      <div class="row mt-5">
+        <div class="col-4 text-center">
+          <div style="border-top:2px solid #1e3a8a;padding-top:8px;margin-top:40px;">
+            <div style="font-size:12px;font-weight:700;color:#1e3a8a;">{{ cert.issued_by.get_full_name }}</div>
+            <div style="font-size:11px;color:#64748b;">{{ cert.issued_by.get_role_display }}</div>
+          </div>
+        </div>
+        <div class="col-4 text-center">
+          <div style="border-top:2px solid #e2e8f0;padding-top:8px;margin-top:40px;">
+            <div style="font-size:12px;font-weight:700;color:#64748b;">Office Seal</div>
+          </div>
+        </div>
+        <div class="col-4 text-center">
+          <div style="border-top:2px solid #1e3a8a;padding-top:8px;margin-top:40px;">
+            <div style="font-size:12px;font-weight:700;color:#1e3a8a;">Principal</div>
+            <div style="font-size:11px;color:#64748b;">College Management System</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-4" style="border-top:1px dashed #cbd5e1;padding-top:12px;">
+        <p style="font-size:10px;color:#94a3b8;margin:0;">This is a computer-generated certificate. Printed on {{ cert.issued_date|date:"d/m/Y" }}. Valid only with official seal.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

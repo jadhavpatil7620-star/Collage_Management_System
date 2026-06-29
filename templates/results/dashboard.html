@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Results{% endblock %}
+{% block page_title %}Results Management{% endblock %}
+{% block content %}
+<div class="section-header">
+  <h5><i class="bi bi-award-fill text-warning me-2"></i>Exams & Results</h5>
+  {% if request.user.role != 'accountant' %}
+  <a href="{% url 'exam_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Create Exam</a>
+  {% endif %}
+</div>
+<div class="row g-3">
+  {% for exam in exams %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <h6 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">{{ exam.name }}</h6>
+            <div class="text-muted-sm">{{ exam.class_group }}</div>
+          </div>
+          <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size:10px;">{{ exam.get_exam_type_display }}</span>
+        </div>
+        {% if exam.start_date %}<div class="text-muted-sm mt-2"><i class="bi bi-calendar3 me-1"></i>{{ exam.start_date }} {% if exam.end_date %}— {{ exam.end_date }}{% endif %}</div>{% endif %}
+        <div class="d-flex gap-2 mt-3">
+          {% if request.user.role != 'accountant' %}
+          <a href="{% url 'enter_marks' exam.pk %}" class="btn btn-primary btn-sm flex-fill"><i class="bi bi-pencil me-1"></i>Enter Marks</a>
+          {% endif %}
+          <a href="{% url 'result_report' %}?exam={{ exam.pk }}" class="btn btn-outline-secondary btn-sm flex-fill"><i class="bi bi-eye me-1"></i>Report</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="empty-state"><i class="bi bi-clipboard-x"></i><p>No exams created yet</p><a href="{% url 'exam_add' %}" class="btn btn-primary btn-sm">Create First Exam</a></div></div>
+  {% endfor %}
+</div>
+{% endblock %}

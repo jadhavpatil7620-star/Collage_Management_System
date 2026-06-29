@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}Practical Marks{% endblock %}
+{% block page_title %}Practical Marks{% endblock %}
+{% block content %}
+
+<!-- Info Banner -->
+<div class="card mb-3" style="background:linear-gradient(135deg,#1a1f5e,#2d3594);border:none;color:#f1f5f9;">
+  <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div>
+      <div style="font-size:15px;font-weight:700;font-family:'Poppins',sans-serif;">
+        <i class="bi bi-flask-fill me-2" style="color:#fbbf24;"></i>Practical Marks Entry
+      </div>
+      <div style="font-size:12px;color:#93c5fd;">Journal + Viva + Experiment = Total (out of 30)</div>
+    </div>
+    <div class="d-flex gap-3">
+      <div style="text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:#fbbf24;">30</div>
+        <div style="font-size:10px;color:#93c5fd;text-transform:uppercase;letter-spacing:.4px;">Max Marks</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:#34d399;">30</div>
+        <div style="font-size:10px;color:#93c5fd;text-transform:uppercase;letter-spacing:.4px;">Pass Marks</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Class Filter -->
+<div class="card mb-4">
+  <div class="card-body p-3">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Select Class</label>
+        <select name="class" class="form-select" onchange="this.form.submit()">
+          <option value="">Select Class</option>
+          {% for cls in classes %}
+          <option value="{{ cls.pk }}" {% if selected_class == cls.pk|stringformat:"s" %}selected{% endif %}>{{ cls }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if students and subjects %}
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-table text-primary me-2"></i>Practical Marks Entry
+    <span style="float:right;font-size:12px;color:#64748b;">Max: 30 &nbsp;|&nbsp; Pass: 30</span>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" style="font-size:13px;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student</th>
+            <th>Subject</th>
+            <th style="width:85px;">Journal</th>
+            <th style="width:75px;">Viva</th>
+            <th style="width:85px;">Experiment</th>
+            <th style="width:70px;">Total</th>
+            <th style="width:70px;">Status</th>
+            <th style="width:70px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+            {% for subject in subjects %}
+            {% with row_id=forloop.parentloop.counter|stringformat:"s"|add:"-"|add:forloop.counter|stringformat:"s" %}
+            <tr>
+              <td class="text-muted" style="font-size:11px;">{{ forloop.parentloop.counter }}.{{ forloop.counter }}</td>
+              <td class="fw-semibold">{{ student.full_name }}</td>
+              <td class="text-muted">{{ subject.name }}</td>
+              <td colspan="6">
+                <form method="post" class="d-flex align-items-center gap-2 prac-form" id="form-{{ student.pk }}-{{ subject.pk }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="student_id" value="{{ student.pk }}"/>
+                  <input type="hidden" name="subject_id" value="{{ subject.pk }}"/>
+                  <input type="hidden" name="academic_year" value="2024-25"/>
+                  <!-- max_marks and passing_marks are now always 30, set in views.py -->
+
+                  <input type="number" name="journal_marks" placeholder="Journal"
+                         class="form-control form-control-sm prac-part"
+                         style="width:78px;" min="0" max="30" step="0.5"
+                         data-form="{{ student.pk }}-{{ subject.pk }}"/>
+
+                  <input type="number" name="viva_marks" placeholder="Viva"
+                         class="form-control form-control-sm prac-part"
+                         style="width:68px;" min="0" max="30" step="0.5"
+                         data-form="{{ student.pk }}-{{ subject.pk }}"/>
+
+                  <input type="number" name="experiment_marks" placeholder="Exp."
+                         class="form-control form-control-sm prac-part"
+                         style="width:72px;" min="0" max="30" step="0.5"
+                         data-form="{{ student.pk }}-{{ subject.pk }}"/>
+
+                  <!-- Total display -->
+                  <span class="fw-bold total-display" id="total-{{ student.pk }}-{{ subject.pk }}"
+                        style="min-width:40px;text-align:center;color:#1a1f5e;">—</span>
+
+                  <!-- Status badge -->
+                  <span class="badge status-badge" id="status-{{ student.pk }}-{{ subject.pk }}"
+                        style="font-size:10px;">—</span>
+
+                  <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="bi bi-save"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span style="font-size:12px;color:#64748b;">
+      <i class="bi bi-info-circle me-1"></i>
+      Practical pass requires <strong>30 / 30</strong>. Total = Journal + Viva + Experiment.
+    </span>
+  </div>
+</div>
+
+{% elif selected_class %}
+<div class="empty-state"><i class="bi bi-flask"></i><p>No practical subjects found for this class.</p></div>
+{% else %}
+<div class="empty-state"><i class="bi bi-flask"></i><p>Select a class to enter practical marks.</p></div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const PRAC_PASS = 30;
+
+function calcTotal(formKey) {
+  const form = document.getElementById('form-' + formKey);
+  if (!form) return;
+  const inputs = form.querySelectorAll('.prac-part');
+  let total = 0;
+  inputs.forEach(inp => { total += parseFloat(inp.value) || 0; });
+
+  const totalEl = document.getElementById('total-' + formKey);
+  const statusEl = document.getElementById('status-' + formKey);
+  totalEl.textContent = total.toFixed(1);
+
+  if (total >= PRAC_PASS) {
+    totalEl.style.color = '#16a34a';
+    statusEl.className = 'badge bg-success bg-opacity-10 text-success status-badge';
+    statusEl.textContent = 'Pass';
+  } else if (total > 0) {
+    totalEl.style.color = '#dc2626';
+    statusEl.className = 'badge bg-danger bg-opacity-10 text-danger status-badge';
+    statusEl.textContent = 'Fail';
+  } else {
+    totalEl.style.color = '#1a1f5e';
+    totalEl.textContent = '—';
+    statusEl.className = 'badge status-badge';
+    statusEl.style.color = '#94a3b8';
+    statusEl.textContent = '—';
+  }
+}
+
+document.querySelectorAll('.prac-part').forEach(inp => {
+  inp.addEventListener('input', () => calcTotal(inp.dataset.form));
+});
+</script>
+{% endblock %}

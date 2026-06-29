@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% block title %}Result Report{% endblock %}
+{% block page_title %}Result Report{% endblock %}
+{% block extra_css %}
+<style>
+@media print {
+  .sidebar,.topbar,.no-print{display:none!important}
+  .main-wrap{margin-left:0!important}
+  .card{box-shadow:none!important}
+}
+</style>
+{% endblock %}
+{% block content %}
+<!-- Filter -->
+<div class="card mb-4 no-print">
+  <div class="card-header"><i class="bi bi-funnel-fill me-2"></i>Select Student & Exam</div>
+  <div class="card-body p-3">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Exam</label>
+        <select name="exam" class="form-select" onchange="this.form.submit()">
+          <option value="">Select Exam</option>
+          {% for e in exams %}<option value="{{ e.pk }}" {% if selected_exam == e.pk|stringformat:"s" %}selected{% endif %}>{{ e.name }} — {{ e.class_group }}</option>{% endfor %}
+        </select>
+      </div>
+      {% if students %}
+      <div class="col-md-4">
+        <label class="form-label">Student</label>
+        <select name="student" class="form-select">
+          <option value="">Select Student</option>
+          {% for s in students %}<option value="{{ s.pk }}" {% if selected_student == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.full_name }} ({{ s.prn }})</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2"><button type="submit" class="btn btn-primary w-100 mt-4">Generate</button></div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+{% if report %}
+<!-- Marksheet -->
+<div class="card" style="max-width:800px;margin:0 auto;">
+  <div class="card-body p-5">
+    <!-- Header -->
+    <div class="text-center border-bottom pb-4 mb-4">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:14px;font-size:28px;margin-bottom:12px;">🎓</div>
+      <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;color:#1e293b;margin:0;">COLLEGE MANAGEMENT SYSTEM</h3>
+      <p style="font-size:12px;color:#64748b;margin:4px 0;">Official Marksheet</p>
+    </div>
+
+    <!-- Exam & Student Info -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div style="background:#f8fafc;border-radius:10px;padding:16px;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;font-weight:700;margin-bottom:10px;">Student Information</div>
+          <table style="font-size:13px;width:100%;">
+            <tr><td style="color:#64748b;padding:3px 0;width:100px;">Name</td><td class="fw-600">{{ student.full_name }}</td></tr>
+            <tr><td style="color:#64748b;padding:3px 0;">PRN</td><td><code>{{ student.prn }}</code></td></tr>
+            <tr><td style="color:#64748b;padding:3px 0;">Class</td><td>{{ student.current_class|default:"—" }}</td></tr>
+            <tr><td style="color:#64748b;padding:3px 0;">Adm. No</td><td>{{ student.admission_no }}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="background:#f8fafc;border-radius:10px;padding:16px;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;font-weight:700;margin-bottom:10px;">Exam Information</div>
+          <table style="font-size:13px;width:100%;">
+            <tr><td style="color:#64748b;padding:3px 0;width:100px;">Exam</td><td class="fw-600">{{ report.exam.name }}</td></tr>
+            <tr><td style="color:#64748b;padding:3px 0;">Type</td><td>{{ report.exam.get_exam_type_display }}</td></tr>
+            <tr><td style="color:#64748b;padding:3px 0;">Year</td><td>{{ report.exam.academic_year }}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exam Info Banner -->
+    <div class="alert alert-info py-2 px-3 mb-3 no-print" style="font-size:13px;border-radius:10px;">
+      <strong>Passing Criteria:</strong>
+      {% if report.exam.exam_type == 'internal' or report.exam.exam_type == 'unit' or report.exam.exam_type == 'oral' %}
+        Internal Marks — Pass: <strong>15 / 25</strong>
+      {% elif report.exam.exam_type == 'practical' %}
+        Practical Marks — Pass: <strong>30 / 30</strong>
+      {% else %}
+        Prelim / External (Presem) Marks — Pass: <strong>30 / 75</strong>
+      {% endif %}
+      &nbsp;|&nbsp; <span class="text-success fw-bold">PASS</span> requires clearing ALL subjects.
+    </div>
+    <table class="table" style="font-size:13px;border:1px solid #e2e8f0;">
+      <thead style="background:#f8fafc;">
+        <tr>
+          <th>Subject</th>
+          <th class="text-center">Max Marks</th>
+          <th class="text-center">Obtained</th>
+          <th class="text-center">Passing</th>
+          <th class="text-center">Grade</th>
+          <th class="text-center">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in report.marks %}
+        <tr>
+          <td class="fw-600">{{ m.subject.name }}<br><span style="font-size:11px;color:#64748b;">{{ m.subject.code }}</span></td>
+          <td class="text-center">{{ m.max_marks }}</td>
+          <td class="text-center fw-bold">
+            {% if m.is_absent %}
+              <span class="text-warning">AB</span>
+            {% else %}
+              <span class="{% if m.marks_obtained >= m.passing_marks %}text-success{% else %}text-danger{% endif %}">
+                {{ m.marks_obtained|default:"—" }}
+              </span>
+            {% endif %}
+          </td>
+          <td class="text-center">{{ m.passing_marks }}</td>
+          <td class="text-center">
+            <span class="badge bg-{% if m.grade == 'O' %}warning{% elif m.grade == 'F' or m.grade == 'AB' %}danger{% else %}primary{% endif %} bg-opacity-15 text-{% if m.grade == 'O' %}warning{% elif m.grade == 'F' or m.grade == 'AB' %}danger{% else %}primary{% endif %}" style="font-size:12px;font-weight:700;">
+              {{ m.grade|default:"—" }}
+            </span>
+          </td>
+          <td class="text-center">
+            {% if m.is_absent %}
+              <span class="badge bg-warning bg-opacity-10 text-warning" style="font-size:10px;">Absent</span>
+            {% elif m.marks_obtained and m.marks_obtained >= m.passing_marks %}
+              <span class="badge bg-success bg-opacity-10 text-success" style="font-size:10px;">Pass</span>
+            {% else %}
+              <span class="badge bg-danger bg-opacity-10 text-danger" style="font-size:10px;">Fail</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot style="background:#f8fafc;font-weight:700;">
+        <tr>
+          <td>TOTAL</td>
+          <td class="text-center">{{ report.total_max }}</td>
+          <td class="text-center">{{ report.total_obtained }}</td>
+          <td class="text-center">—</td>
+          <td class="text-center">—</td>
+          <td class="text-center">—</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Result Summary Box -->
+    <div class="row g-3 mt-2">
+      <div class="col-md-4">
+        <div style="text-align:center;padding:16px;background:#f8fafc;border-radius:10px;">
+          <div style="font-size:11px;color:#64748b;text-transform:uppercase;font-weight:600;">Percentage</div>
+          <div style="font-size:32px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;color:{% if report.percentage >= 60 %}#10b981{% elif report.percentage >= 40 %}#f59e0b{% else %}#ef4444{% endif %};">{{ report.percentage }}%</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div style="text-align:center;padding:16px;background:#f8fafc;border-radius:10px;">
+          <div style="font-size:11px;color:#64748b;text-transform:uppercase;font-weight:600;">Result</div>
+          <div style="font-size:28px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;color:{% if report.result == 'PASS' %}#10b981{% else %}#ef4444{% endif %};">{{ report.result }}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div style="text-align:center;padding:16px;background:#f8fafc;border-radius:10px;">
+          <div style="font-size:11px;color:#64748b;text-transform:uppercase;font-weight:600;">Marks</div>
+          <div style="font-size:28px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;color:#3b82f6;">{{ report.total_obtained }}/{{ report.total_max }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4 gap-2 no-print">
+      <button onclick="window.print()" class="btn btn-primary btn-sm"><i class="bi bi-printer me-1"></i>Print Marksheet</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

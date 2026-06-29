@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0" style="font-size:12px;">
+    <li class="breadcrumb-item"><a href="{% url 'student_list' %}">Students</a></li>
+    <li class="breadcrumb-item active">{{ title }}</li>
+  </ol></nav>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<div class="row g-3">
+  <!-- Personal Info -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-fill text-primary me-2"></i>Personal Information</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label">First Name *</label>{{ form.first_name }}</div>
+          <div class="col-md-4"><label class="form-label">Middle Name</label>{{ form.middle_name }}</div>
+          <div class="col-md-4"><label class="form-label">Last Name *</label>{{ form.last_name }}</div>
+          <div class="col-md-3"><label class="form-label">Gender *</label>{{ form.gender }}</div>
+          <div class="col-md-3"><label class="form-label">Date of Birth *</label>{{ form.date_of_birth }}</div>
+          <div class="col-md-3"><label class="form-label">Blood Group</label>{{ form.blood_group }}</div>
+          <div class="col-md-3"><label class="form-label">Category</label>{{ form.category }}</div>
+          <div class="col-md-4"><label class="form-label">Phone *</label>{{ form.phone }}</div>
+          <div class="col-md-4"><label class="form-label">Email</label>{{ form.email }}</div>
+          <div class="col-md-4"><label class="form-label">Aadhar No</label>{{ form.aadhar_no }}</div>
+          <div class="col-md-4"><label class="form-label">Caste</label>{{ form.caste }}</div>
+          <div class="col-12"><label class="form-label">Address *</label>{{ form.address }}</div>
+          <div class="col-md-4"><label class="form-label">Photo</label>{{ form.photo }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Academic Info -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-mortarboard-fill text-success me-2"></i>Academic Information</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label">PRN *</label>{{ form.prn }}</div>
+          <div class="col-md-4"><label class="form-label">Admission No *</label>{{ form.admission_no }}</div>
+          <div class="col-md-4"><label class="form-label">Admission Date *</label>{{ form.admission_date }}</div>
+          <div class="col-md-6"><label class="form-label">Class</label>{{ form.current_class }}</div>
+          <div class="col-md-6"><label class="form-label">Status</label>{{ form.status }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parent Info -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-people-fill text-warning me-2"></i>Parent / Guardian Information</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12"><h6 class="fw-600" style="font-size:13px;color:#64748b;">Father's Details</h6></div>
+          <div class="col-md-4"><label class="form-label">Father Name *</label>{{ form.father_name }}</div>
+          <div class="col-md-4"><label class="form-label">Father Phone</label>{{ form.father_phone }}</div>
+          <div class="col-md-4"><label class="form-label">Occupation</label>{{ form.father_occupation }}</div>
+          <div class="col-12 mt-2"><h6 class="fw-600" style="font-size:13px;color:#64748b;">Mother's Details</h6></div>
+          <div class="col-md-4"><label class="form-label">Mother Name *</label>{{ form.mother_name }}</div>
+          <div class="col-md-4"><label class="form-label">Mother Phone</label>{{ form.mother_phone }}</div>
+          <div class="col-12 mt-2"><h6 class="fw-600" style="font-size:13px;color:#64748b;">Guardian (Optional)</h6></div>
+          <div class="col-md-4"><label class="form-label">Guardian Name</label>{{ form.guardian_name }}</div>
+          <div class="col-md-4"><label class="form-label">Guardian Phone</label>{{ form.guardian_phone }}</div>
+          <div class="col-md-4"><label class="form-label">Relation</label>{{ form.guardian_relation }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Errors -->
+  {% if form.errors %}
+  <div class="col-12">
+    <div class="alert alert-danger">
+      <strong>Please fix the following errors:</strong>
+      {{ form.errors }}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="col-12 d-flex gap-2 justify-content-end pb-3">
+    <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save Student</button>
+  </div>
+</div>
+</form>
+{% endblock %}

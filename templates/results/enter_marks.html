@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block title %}Enter Marks{% endblock %}
+{% block page_title %}Enter Marks{% endblock %}
+
+{% block content %}
+<!-- Exam Info Banner -->
+<div class="card mb-3" style="background:linear-gradient(135deg,#1a1f5e,#2d3594);border:none;color:#f1f5f9;">
+  <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div>
+      <div style="font-size:16px;font-weight:700;font-family:'Poppins',sans-serif;">{{ exam.name }}</div>
+      <div style="font-size:12px;color:#93c5fd;">{{ exam.class_group }} &nbsp;·&nbsp; {{ exam.get_exam_type_display }}</div>
+    </div>
+    <div class="d-flex gap-3">
+      <div style="text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:#fbbf24;" id="banner-max">
+          {% if exam.exam_type == 'external' or exam.exam_type == 'term' %}75{% elif exam.exam_type == 'practical' %}30{% else %}25{% endif %}
+        </div>
+        <div style="font-size:10px;color:#93c5fd;text-transform:uppercase;letter-spacing:.4px;">Max Marks</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:#34d399;" id="banner-pass">
+          {% if exam.exam_type == 'external' or exam.exam_type == 'term' %}30{% elif exam.exam_type == 'practical' %}30{% else %}15{% endif %}
+        </div>
+        <div style="font-size:10px;color:#93c5fd;text-transform:uppercase;letter-spacing:.4px;">Pass Marks</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Select Subject -->
+<div class="card mb-3">
+  <div class="card-body p-3">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label">Select Subject</label>
+        <select name="subject" class="form-select" onchange="this.form.submit()">
+          <option value="">-- Select Subject --</option>
+          {% for sub in subjects %}
+          <option value="{{ sub.pk }}" {% if selected_subject and selected_subject.pk == sub.pk %}selected{% endif %}>{{ sub.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if selected_subject %}
+<form method="post">
+{% csrf_token %}
+<input type="hidden" name="subject_id" value="{{ selected_subject.pk }}"/>
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <span><i class="bi bi-pencil-square text-primary me-2"></i>Marks Entry — <strong>{{ selected_subject.name }}</strong></span>
+    <span style="font-size:12px;color:#64748b;">
+      Pass:
+      {% if exam.exam_type == 'external' or exam.exam_type == 'term' %}30 / 75
+      {% elif exam.exam_type == 'practical' %}30 / 30
+      {% else %}15 / 25{% endif %}
+    </span>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th style="width:40px;">#</th>
+          <th>Student</th>
+          <th>PRN</th>
+          <th style="width:90px;">Max</th>
+          <th style="width:120px;">Marks Obtained</th>
+          <th style="width:70px;text-align:center;">Absent</th>
+          <th style="width:85px;text-align:center;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr id="row-{{ student.pk }}">
+          <td class="text-muted" style="font-size:12px;">{{ forloop.counter }}</td>
+          <td class="fw-semibold" style="font-size:13px;">{{ student.full_name }}</td>
+          <td><code style="font-size:11px;">{{ student.prn }}</code></td>
+          <td>
+            <input type="number" name="max_{{ student.pk }}"
+                   class="form-control form-control-sm"
+                   value="{% if exam.exam_type == 'external' or exam.exam_type == 'term' %}75{% elif exam.exam_type == 'practical' %}30{% else %}25{% endif %}"
+                   readonly
+                   style="width:75px;background:#f8fafc;font-weight:600;"/>
+          </td>
+          <td>
+            <input type="number" name="marks_{{ student.pk }}"
+                   id="marks-{{ student.pk }}"
+                   class="form-control form-control-sm marks-input"
+                   step="0.5" min="0"
+                   max="{% if exam.exam_type == 'external' or exam.exam_type == 'term' %}75{% elif exam.exam_type == 'practical' %}30{% else %}25{% endif %}"
+                   style="width:95px;" placeholder="—"
+                   value="{% for mid, mobj in marks_data.items %}{% if mid == student.pk and not mobj.is_absent %}{{ mobj.marks_obtained }}{% endif %}{% endfor %}"
+            />
+          </td>
+          <td style="text-align:center;">
+            <input type="checkbox" name="absent_{{ student.pk }}"
+                   id="absent-{{ student.pk }}"
+                   class="form-check-input absent-cb"
+                   data-pk="{{ student.pk }}"
+                   {% for mid, mobj in marks_data.items %}{% if mid == student.pk and mobj.is_absent %}checked{% endif %}{% endfor %}
+            />
+          </td>
+          <td style="text-align:center;" id="status-{{ student.pk }}">
+            <span class="badge" style="color:#94a3b8;font-size:10px;">—</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-3">No active students in this class.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <span style="font-size:12px;color:#64748b;">
+      <i class="bi bi-info-circle me-1"></i>
+      Passing marks:
+      <strong>{% if exam.exam_type == 'external' or exam.exam_type == 'term' %}30 / 75{% elif exam.exam_type == 'practical' %}30 / 30{% else %}15 / 25{% endif %}</strong>
+    </span>
+    <div class="d-flex gap-2">
+      <a href="{% url 'exam_list' %}" class="btn btn-outline-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Save Marks</button>
+    </div>
+  </div>
+</div>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Pass marks from exam type (set by Django template)
+const PASS_MARKS = parseInt(document.getElementById('banner-pass').textContent.trim()) || 15;
+const MAX_MARKS  = parseInt(document.getElementById('banner-max').textContent.trim()) || 25;
+
+function updateStatus(pk) {
+  const marksInp  = document.getElementById('marks-'  + pk);
+  const absentCb  = document.getElementById('absent-' + pk);
+  const statusCell = document.getElementById('status-' + pk);
+  const badge = statusCell.querySelector('.badge');
+
+  if (absentCb.checked) {
+    badge.className   = 'badge bg-warning bg-opacity-10 text-warning';
+    badge.textContent = 'Absent';
+    badge.style.color = '';
+    return;
+  }
+  const val = parseFloat(marksInp.value);
+  if (isNaN(val) || marksInp.value === '') {
+    badge.className   = 'badge';
+    badge.style.color = '#94a3b8';
+    badge.textContent = '—';
+    return;
+  }
+  if (val >= PASS_MARKS) {
+    badge.className   = 'badge bg-success bg-opacity-10 text-success';
+    badge.style.color = '';
+    badge.textContent = 'Pass';
+  } else {
+    badge.className   = 'badge bg-danger bg-opacity-10 text-danger';
+    badge.style.color = '';
+    badge.textContent = 'Fail';
+  }
+}
+
+// Wire absent checkboxes
+document.querySelectorAll('.absent-cb').forEach(cb => {
+  cb.addEventListener('change', function () {
+    const inp = document.getElementById('marks-' + this.dataset.pk);
+    inp.disabled = this.checked;
+    if (this.checked) inp.value = '';
+    updateStatus(this.dataset.pk);
+  });
+  // Restore disabled state for pre-checked
+  if (cb.checked) {
+    document.getElementById('marks-' + cb.dataset.pk).disabled = true;
+  }
+});
+
+// Wire marks inputs
+document.querySelectorAll('.marks-input').forEach(inp => {
+  const pk = inp.id.replace('marks-', '');
+  inp.addEventListener('input', () => updateStatus(pk));
+  updateStatus(pk); // init on page load
+});
+</script>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Receipt #{{ payment.receipt_no }}{% endblock %}
+{% block page_title %}Fee Receipt{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+  .sidebar, .topbar, .no-print { display: none !important; }
+  .main-wrap { margin-left: 0 !important; }
+  .receipt-card { box-shadow: none !important; border: 2px solid #000 !important; }
+}
+.receipt-card { max-width: 720px; margin: 0 auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="no-print mb-3 d-flex gap-2">
+  <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer-fill me-2"></i>Print Receipt</button>
+  <a href="{% url 'collect_fee' %}" class="btn btn-outline-secondary"><i class="bi bi-plus me-1"></i>New Payment</a>
+</div>
+
+<div class="card receipt-card">
+  <div class="card-body p-5">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between border-bottom pb-4 mb-4">
+      <div class="d-flex align-items-center gap-3">
+        <div style="width:60px;height:60px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;">🎓</div>
+        <div>
+          <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;margin:0;">College Management System</h4>
+          <p style="font-size:12px;color:#64748b;margin:0;">Academic Institution · Official Fee Receipt</p>
+        </div>
+      </div>
+      <div class="text-end">
+        <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Receipt No.</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#3b82f6;">#{{ payment.receipt_no }}</div>
+      </div>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="text-center mb-4">
+      <span style="background:#dcfce7;color:#14532d;padding:6px 20px;border-radius:100px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">
+        ✓ Payment {{ payment.get_status_display }}
+      </span>
+    </div>
+
+    <!-- Main Info -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <h6 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;font-weight:700;margin-bottom:12px;">Student Information</h6>
+        <table style="font-size:13px;width:100%;">
+          <tr><td style="color:#64748b;padding:4px 0;width:110px;">Name</td><td class="fw-600">{{ payment.student.full_name }}</td></tr>
+          <tr><td style="color:#64748b;padding:4px 0;">PRN</td><td><code>{{ payment.student.prn }}</code></td></tr>
+          <tr><td style="color:#64748b;padding:4px 0;">Adm. No</td><td>{{ payment.student.admission_no }}</td></tr>
+          <tr><td style="color:#64748b;padding:4px 0;">Class</td><td>{{ payment.student.current_class|default:"—" }}</td></tr>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <h6 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;font-weight:700;margin-bottom:12px;">Payment Information</h6>
+        <table style="font-size:13px;width:100%;">
+          <tr><td style="color:#64748b;padding:4px 0;width:110px;">Date</td><td class="fw-600">{{ payment.payment_date }}</td></tr>
+          <tr><td style="color:#64748b;padding:4px 0;">Mode</td><td>{{ payment.get_payment_mode_display }}</td></tr>
+          {% if payment.transaction_id %}<tr><td style="color:#64748b;padding:4px 0;">Txn ID</td><td><code>{{ payment.transaction_id }}</code></td></tr>{% endif %}
+          {% if payment.cheque_no %}<tr><td style="color:#64748b;padding:4px 0;">Cheque No</td><td>{{ payment.cheque_no }}</td></tr>{% endif %}
+          <tr><td style="color:#64748b;padding:4px 0;">Collected By</td><td>{{ payment.collected_by.get_full_name }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Amount Box -->
+    <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:14px;padding:24px;text-align:center;color:#fff;margin-bottom:24px;">
+      <div style="font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-bottom:6px;">Amount Paid</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:44px;font-weight:800;color:#10b981;">₹{{ payment.amount_paid }}</div>
+      {% if payment.fee_structure %}
+      <div style="font-size:13px;color:#94a3b8;margin-top:6px;">{{ payment.fee_structure.name }}</div>
+      {% endif %}
+    </div>
+
+    {% if payment.remarks %}
+    <div class="mb-4" style="font-size:13px;color:#64748b;"><strong>Remarks:</strong> {{ payment.remarks }}</div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="d-flex align-items-end justify-content-between" style="border-top:1px solid #e2e8f0;padding-top:20px;">
+      <div style="font-size:11px;color:#94a3b8;">This is a computer-generated receipt.<br>No signature required.</div>
+      <div class="text-end">
+        <div style="border-top:2px solid #0f172a;padding-top:8px;margin-top:40px;font-size:12px;color:#64748b;">Authorized Signatory</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — College Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; background: #f0f4ff; }
+
+    /* LEFT PANEL */
+    .left-panel {
+      width: 52%;
+      background: linear-gradient(145deg, #1a1f5e 0%, #2d3594 40%, #1565c0 100%);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 60px 50px; position: relative; overflow: hidden;
+    }
+    .left-panel::before {
+      content: ''; position: absolute; width: 420px; height: 420px;
+      border: 60px solid rgba(255,255,255,.05); border-radius: 50%; top: -140px; left: -140px;
+    }
+    .left-panel::after {
+      content: ''; position: absolute; width: 320px; height: 320px;
+      border: 50px solid rgba(255,255,255,.05); border-radius: 50%; bottom: -100px; right: -80px;
+    }
+    .left-inner { position: relative; z-index: 1; max-width: 380px; text-align: center; }
+    .college-icon {
+      width: 90px; height: 90px;
+      background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.2);
+      border-radius: 24px; display: flex; align-items: center; justify-content: center;
+      font-size: 44px; margin: 0 auto 28px;
+    }
+    .left-inner h1 { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 28px; color: #fff; line-height: 1.25; margin-bottom: 12px; }
+    .left-inner p { font-size: 14px; color: rgba(255,255,255,.65); line-height: 1.7; margin-bottom: 36px; }
+    .stat-row { display: flex; gap: 20px; justify-content: center; margin-bottom: 36px; }
+    .stat-box { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 14px; padding: 16px 22px; text-align: center; min-width: 90px; }
+    .stat-box .num { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; color: #7dd3fc; }
+    .stat-box .lbl { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 3px; }
+    .portal-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .p-tag { padding: 6px 16px; border-radius: 100px; font-size: 11px; font-weight: 600; letter-spacing: .3px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.8); }
+    .p-tag.gold   { background: rgba(251,191,36,.15); border-color: rgba(251,191,36,.35); color: #fbbf24; }
+    .p-tag.blue   { background: rgba(96,165,250,.15); border-color: rgba(96,165,250,.35); color: #60a5fa; }
+    .p-tag.green  { background: rgba(52,211,153,.15); border-color: rgba(52,211,153,.35); color: #34d399; }
+    .p-tag.purple { background: rgba(167,139,250,.15); border-color: rgba(167,139,250,.35); color: #a78bfa; }
+
+    /* RIGHT PANEL */
+    .right-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 50px; background: #f0f4ff; }
+    .login-box { width: 100%; max-width: 400px; }
+    .top-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+    .icon-sm { width: 42px; height: 42px; background: linear-gradient(135deg, #2d3594, #1565c0); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .brand { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; color: #1a1f5e; }
+    .sub { font-size: 11px; color: #94a3b8; }
+    .login-box h2 { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px; color: #1a1f5e; margin-bottom: 6px; }
+    .login-box .tagline { font-size: 13px; color: #64748b; margin-bottom: 28px; }
+    .form-label { font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; display: block; }
+    .input-wrap { position: relative; margin-bottom: 18px; }
+    .input-wrap .iicon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 15px; pointer-events: none; z-index: 2; }
+    .input-wrap input { width: 100%; padding: 12px 14px 12px 42px; border: 1.5px solid #d1d5db; border-radius: 12px; font-size: 14px; color: #1e293b; background: #fff; outline: none; transition: border-color .2s, box-shadow .2s; }
+    .input-wrap input:focus { border-color: #2d3594; box-shadow: 0 0 0 3px rgba(45,53,148,.12); }
+    .input-wrap input::placeholder { color: #9ca3af; }
+    .pw-toggle-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 15px; padding: 4px; z-index: 2; }
+    .pw-toggle-btn:hover { color: #2d3594; }
+    .remember-row { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; }
+    .remember-row input[type=checkbox] { width: 16px; height: 16px; accent-color: #2d3594; cursor: pointer; }
+    .remember-row label { font-size: 13px; color: #4b5563; cursor: pointer; }
+    .btn-signin { width: 100%; padding: 13px; background: linear-gradient(135deg, #1a1f5e, #2d3594); border: none; border-radius: 12px; color: #fff; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: .3px; transition: transform .15s, box-shadow .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-signin:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(29,35,120,.3); }
+    .btn-signin:active { transform: translateY(0); }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 22px 0; color: #9ca3af; font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .demo-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #4b5563; line-height: 1.5; cursor: pointer; transition: border-color .15s, background .15s; }
+    .demo-card:hover { border-color: #2d3594; background: #eef2ff; }
+    .demo-card strong { color: #1a1f5e; font-size: 12px; display: block; margin-bottom: 2px; }
+    .demo-card code { color: #2563eb; font-size: 11px; }
+    .alert { border-radius: 10px; font-size: 13px; margin-bottom: 18px; border: none; padding: 10px 14px; }
+    .alert-danger  { background: #fee2e2; color: #7f1d1d; }
+    .alert-success { background: #dcfce7; color: #14532d; }
+    .alert-info    { background: #dbeafe; color: #1e3a8a; }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .left-panel { width: 100%; padding: 40px 24px; }
+      .right-panel { padding: 30px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="left-panel">
+  <div class="left-inner">
+    <div class="college-icon">🎓</div>
+    <h1>College Management System</h1>
+    <p>A unified digital platform for administration, academics, attendance, results, and finance management.</p>
+    <div class="stat-row">
+      <div class="stat-box"><div class="num">4</div><div class="lbl">Portals</div></div>
+      <div class="stat-box"><div class="num">360°</div><div class="lbl">Management</div></div>
+      <div class="stat-box"><div class="num">✓</div><div class="lbl">Secure</div></div>
+    </div>
+    <div class="portal-tags">
+      <span class="p-tag gold"><i class="bi bi-person-badge me-1"></i>Principal</span>
+      <span class="p-tag blue"><i class="bi bi-person-workspace me-1"></i>Staff</span>
+      <span class="p-tag green"><i class="bi bi-clipboard-data me-1"></i>Clerk</span>
+      <span class="p-tag purple"><i class="bi bi-cash-coin me-1"></i>Accountant</span>
+    </div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="login-box">
+    <div class="top-logo">
+      <div class="icon-sm">🎓</div>
+      <div>
+        <div class="brand">CMS Portal</div>
+        <div class="sub">College Management System</div>
+      </div>
+    </div>
+
+    <h2>Welcome Back 👋</h2>
+    <p class="tagline">Sign in to access your dashboard</p>
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} d-flex align-items-center gap-2">
+        <i class="bi bi-{% if message.tags == 'error' or message.tags == 'danger' %}exclamation-circle-fill{% elif message.tags == 'success' %}check-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      {% if request.GET.next %}
+      <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+      {% endif %}
+
+      <label class="form-label">Username</label>
+      <div class="input-wrap">
+        <i class="bi bi-person-fill iicon"></i>
+        <input type="text" name="username" id="usernameInput"
+               placeholder="Enter your username" required autofocus
+               value="{{ request.POST.username|default:'' }}"/>
+      </div>
+
+      <label class="form-label">Password</label>
+      <div class="input-wrap">
+        <i class="bi bi-lock-fill iicon"></i>
+        <input type="password" name="password" id="pwInput"
+               placeholder="Enter your password" required style="padding-right:44px;"/>
+        <button type="button" class="pw-toggle-btn" onclick="togglePwd()">
+          <i class="bi bi-eye-fill" id="eyeIcon"></i>
+        </button>
+      </div>
+
+      <div class="remember-row">
+        <input type="checkbox" id="remember" name="remember"/>
+        <label for="remember">Remember me on this device</label>
+      </div>
+
+      <button type="submit" class="btn-signin">
+        <i class="bi bi-box-arrow-in-right"></i> Sign In to Portal
+      </button>
+    </form>
+
+    <div class="divider">Quick demo login</div>
+
+    <div class="demo-grid">
+      <div class="demo-card" onclick="fillLogin('principal','principal@123')">
+        <strong>🏫 Principal</strong>
+        principal<br><code>principal@123</code>
+      </div>
+      <div class="demo-card" onclick="fillLogin('staff1','staff@123')">
+        <strong>👨‍🏫 Staff</strong>
+        staff1<br><code>staff@123</code>
+      </div>
+      <div class="demo-card" onclick="fillLogin('clerk1','clerk@123')">
+        <strong>📋 Clerk</strong>
+        clerk1<br><code>clerk@123</code>
+      </div>
+      <div class="demo-card" onclick="fillLogin('accountant1','accountant@123')">
+        <strong>💰 Accountant</strong>
+        accountant1<br><code>accountant@123</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePwd() {
+  const inp = document.getElementById('pwInput');
+  const icon = document.getElementById('eyeIcon');
+  if (inp.type === 'password') { inp.type = 'text'; icon.className = 'bi bi-eye-slash-fill'; }
+  else { inp.type = 'password'; icon.className = 'bi bi-eye-fill'; }
+}
+function fillLogin(user, pass) {
+  document.getElementById('usernameInput').value = user;
+  document.getElementById('pwInput').value = pass;
+}
+</script>
+</body>
+</html>

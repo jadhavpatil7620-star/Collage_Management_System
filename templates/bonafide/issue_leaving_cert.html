@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Issue Leaving Certificate{% endblock %}
+{% block page_title %}Issue Leaving Certificate{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;">
+        <i class="bi bi-file-earmark-x-fill me-2"></i>Issue Leaving Certificate
+      </div>
+      <div class="card-body p-4">
+        <form method="post">{% csrf_token %}
+          <div class="mb-3"><label class="form-label">Student *</label>{{ form.student }}</div>
+          <div class="mb-3"><label class="form-label">Date of Leaving *</label>{{ form.leaving_date }}</div>
+          <div class="mb-3"><label class="form-label">Reason for Leaving *</label>{{ form.reason }}</div>
+          <div class="mb-3"><label class="form-label">Last Exam Appeared</label>{{ form.last_exam }}</div>
+          <div class="mb-3"><label class="form-label">Conduct</label>{{ form.conduct }}</div>
+          <div class="mb-4"><label class="form-label">Remarks</label>{{ form.remarks }}</div>
+          {% if form.errors %}<div class="alert alert-danger">{{ form.errors }}</div>{% endif %}
+          <div class="alert alert-warning" style="font-size:12px;"><i class="bi bi-exclamation-triangle me-2"></i>Note: Issuing this certificate will mark the student as "Dropped" in the system.</div>
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'leaving_cert_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger"><i class="bi bi-file-earmark-x me-1"></i>Issue & Print</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

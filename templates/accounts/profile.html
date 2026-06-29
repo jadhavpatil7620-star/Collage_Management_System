@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+
+    <div class="card shadow-sm border-0">
+
+      <!-- HEADER -->
+      <div style="background:linear-gradient(135deg,#0f172a,#1e293b);
+                  padding:30px;border-radius:14px 14px 0 0;
+                  display:flex;align-items:center;gap:20px;">
+
+        <!-- PROFILE PHOTO -->
+        <div style="position:relative;">
+
+          {% if request.user.profile_photo %}
+            <img id="preview"
+                 src="{{ request.user.profile_photo.url }}"
+                 style="width:90px;height:90px;border-radius:50%;
+                        object-fit:cover;border:3px solid #fff;
+                        cursor:pointer;">
+          {% else %}
+            <img id="preview"
+                 src="https://ui-avatars.com/api/?name={{request.user.first_name}}+{{request.user.last_name}}&background=6366f1&color=fff&size=128"
+                 style="width:90px;height:90px;border-radius:50%;
+                        object-fit:cover;border:3px solid #fff;
+                        cursor:pointer;">
+          {% endif %}
+
+          <!-- CAMERA ICON -->
+          <div onclick="openFile()"
+               style="position:absolute;bottom:0;right:0;
+                      width:28px;height:28px;border-radius:50%;
+                      background:#3b82f6;color:#fff;
+                      display:flex;align-items:center;
+                      justify-content:center;
+                      cursor:pointer;font-size:14px;">
+            <i class="bi bi-camera"></i>
+          </div>
+
+        </div>
+
+        <!-- USER INFO -->
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#f1f5f9;">
+            {{ request.user.get_full_name|default:request.user.username }}
+          </div>
+
+          <div style="font-size:13px;color:#94a3b8;">
+            {{ request.user.get_role_display }}
+            · {{ request.user.email|default:"No email" }}
+          </div>
+
+          {% if request.user.employee_id %}
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">
+            EMP ID : {{ request.user.employee_id }}
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- BODY -->
+      <div class="p-4">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- HIDDEN FILE INPUT -->
+          <input type="file"
+                 name="profile_photo"
+                 id="id_profile_photo"
+                 style="display:none;">
+
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label">First Name</label>
+              {{ form.first_name }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Last Name</label>
+              {{ form.last_name }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              {{ form.email }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Phone</label>
+              {{ form.phone }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Department</label>
+              {{ form.department }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Address</label>
+              {{ form.address }}
+            </div>
+
+          </div>
+
+          {% if form.errors %}
+          <div class="alert alert-danger mt-3">
+            {{ form.errors }}
+          </div>
+          {% endif %}
+
+          <div class="d-flex justify-content-end mt-4">
+            <button class="btn btn-primary px-4">
+              <i class="bi bi-save me-1"></i><a href="{% url 'dashboard' %}"> Update Profile</a>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<div id="cropModal"
+     style="position:fixed;inset:0;background:rgba(0,0,0,.7);
+            display:none;align-items:center;justify-content:center;z-index:9999;">
+
+    <div style="background:#fff;padding:20px;border-radius:10px;width:400px;">
+        <div>
+            <img id="cropImage" style="max-width:100%;">
+        </div>
+
+        <div style="display:flex;justify-content:end;gap:10px;margin-top:15px;">
+            <button class="btn btn-secondary" onclick="closeCrop()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="cropPhoto()">Crop & Save</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+  function openFile(){
+    document.getElementById("id_profile_photo").click();
+}
+
+let cropper = null;
+const input = document.getElementById("id_profile_photo");
+const image = document.getElementById("cropImage");
+const modal = document.getElementById("cropModal");
+const preview = document.getElementById("preview");
+
+input.addEventListener("change", function(e){
+
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    image.src = url;
+    modal.style.display = "flex";
+
+    if(cropper){
+        cropper.destroy();
+    }
+
+cropper = new Cropper(image, {
+    aspectRatio: 1,
+    viewMode: 1,
+    dragMode: "move",
+    autoCropArea: 0.5,
+    responsive: true,
+    background: false,
+    guides: true,
+    center: true,
+    highlight: false,
+    cropBoxMovable: false,
+    cropBoxResizable: false,
+    zoomable: true,
+
+    ready() {
+
+        const containerData = cropper.getContainerData();
+        const canvasData = cropper.getCanvasData();
+
+        // zoom slightly
+        const scale = containerData.height / canvasData.height;
+        cropper.zoomTo(scale + 0.2);
+
+        // move image upward (face focus)
+        cropper.move(0, -containerData.height * 0.15);
+    }
+});
+
+});
+
+function closeCrop(){
+    modal.style.display = "none";
+    if(cropper){
+        cropper.destroy();
+        cropper = null;
+    }
+}
+
+function cropPhoto(){
+
+    if(!cropper) return;
+
+    const canvas = cropper.getCroppedCanvas({
+        width:300,
+        height:300,
+        imageSmoothingQuality:"high"
+    });
+
+    canvas.toBlob(function(blob){
+
+        const file = new File([blob], "profile.jpg", {type:"image/jpeg"});
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+
+        input.files = dataTransfer.files;
+
+        preview.src = canvas.toDataURL("image/jpeg");
+
+        closeCrop();
+
+    }, "image/jpeg", 0.9);
+
+}
+
+</script>
+
+
+{% endblock %}
